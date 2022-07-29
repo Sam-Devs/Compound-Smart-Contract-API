@@ -1,4 +1,4 @@
-export const erc20 = [
+export const erc20ABI = [
     {
       inputs: [{ internalType: "uint256", name: "chainId_", type: "uint256" }],
       payable: false,

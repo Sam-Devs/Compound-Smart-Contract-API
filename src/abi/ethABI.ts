@@ -1,4 +1,4 @@
-export const eth = [
+export const ethABI = [
     {
       constant: true,
       inputs: [],

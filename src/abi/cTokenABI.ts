@@ -1,4 +1,4 @@
-export const cToken = [
+export const cTokenABI = [
     {
       inputs: [
         { internalType: "address", name: "underlying_", type: "address" },
