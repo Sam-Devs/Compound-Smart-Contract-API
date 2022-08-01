@@ -12,3 +12,5 @@ const compound = new (Compound as any)(process.env.PROVIDER_URL, {
 import {Request, Response} from "express";
 import { C_TOKEN_ADDRESS } from "../../constants";
 import { cTokenABI } from "../../abi/cTokenABI";
+import { cErcAbi } from "../../utils/contracts.json";
+import {  } from "../../services/balance";
