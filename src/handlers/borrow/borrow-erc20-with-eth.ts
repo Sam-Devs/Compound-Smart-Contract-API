@@ -10,7 +10,7 @@ const compound = new (Compound as any)(process.env.PROVIDER_URL, {
 import { Request, Response} from "express";
 import { enterMarket, _balanceOf} from "../../utils";
 
-export const ERC20WithEth = async (req: Request, res: Response) => {
+export const BorrowERC20WithEth = async (req: Request, res: Response) => {
     try {
         const { ethToSupplyAsCollateral, assetName, assetToBorrow, walletAddress} = req.body;
         await compound.supply(Compound.ETH, ethToSupplyAsCollateral);
