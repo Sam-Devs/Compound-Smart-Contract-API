@@ -1,10 +1,12 @@
 import dotenv from "dotenv";
 dotenv.config();
 const Compound = require("@compound-finance/compound-js");
-const compound = new (Compound as any)(process.env.PROVIDER_URL, {
-  privateKey: process.env.PRIVATE_KEY,
-});
 import { Request, Response } from "express";
+const privateKey = process.env.PRIVATE_KEY;
+const providerUrl = process.env.PROVIDER_URL;
+const compound = new (Compound as any)(providerUrl, {
+  privateKey: privateKey,
+});
 
 export const RepayBorrow = async (req: Request, res: Response) => {
   try {
@@ -27,7 +29,7 @@ export const RepayBorrow = async (req: Request, res: Response) => {
 
     return res.status(200).send({
       status: 200,
-      message: "Borrow Repayed successfully",
+      message: "Borrowed Asset Repaid Successfully",
       txn: repayBorrowResult,
     });
   } catch (error) {
