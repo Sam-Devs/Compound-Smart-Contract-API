@@ -1,13 +1,14 @@
 import dotenv from "dotenv";
 dotenv.config();
-const Compound = require("@compound-finance/compound-js");
-const Web3 = require("web3");
-const providerUrl = process.env.PROVIDER_URL;
-const web3 = new Web3(providerUrl);
-const compound = new (Compound as any)(process.env.PROVIDER_URL, {
-  privateKey: process.env.PRIVATE_KEY,
-});
 import { Request, Response } from "express";
+const Compound = require("@compound-finance/compound-js");
+const providerUrl = process.env.PROVIDER_URL;
+const privateKey = process.env.PRIVATE_KEY;
+const Web3 = require("web3");
+const web3 = new Web3(providerUrl);
+const compound = new (Compound as any)(providerUrl, {
+  privateKey: privateKey,
+});
 import { enterMarket, _balanceOf } from "../../utils";
 
 // Mainnet Contract for the Compound Protocol's Comptroller
@@ -19,7 +20,7 @@ export const BorrowErc20WithEth = async (req: Request, res: Response) => {
       ethToSupplyAsCollateral,
       underlyingToBorrow,
       assetName,
-      myWalletAddress,
+      walletAddress,
     } = req.body;
 
     const underlyingDecimals = (Compound.decimals as any)[assetName]; // Number of decimals defined in this ERC20 token's contract
@@ -32,26 +33,23 @@ export const BorrowErc20WithEth = async (req: Request, res: Response) => {
     await compound.supply(Compound.ETH, ethToSupplyAsCollateral);
     await enterMarket();
 
-    console.log(
-      `Now attempting to borrow ${underlyingToBorrow} ${assetName}...`
-    );
+    console.log(`Now attempting to borrow ${underlyingToBorrow} ${assetName}`);
 
     let tx = await compound.borrow(assetName, underlyingToBorrow);
     await tx.wait(1);
-    console.log(`Borrowed ${underlyingToBorrow} ${assetName}...`);
-    
+    console.log(`Borrowed ${underlyingToBorrow} ${assetName}`);
+
     const cEthAddress = Compound.util.getAddress(Compound.cETH);
     const assetAddress = Compound.util.getAddress(Compound[assetName]);
 
-    const balance = await _balanceOf(assetName, myWalletAddress);
-    const ethBalance = await _balanceOf(assetName, myWalletAddress);
-
+    const balance = await _balanceOf(assetName, walletAddress);
+    const ethBalance = await _balanceOf(assetName, walletAddress);
 
     return res.status(200).send({
       status: 200,
       message: "Asset Borrowed successfully",
       borrowBalance: balance,
-      etherBalance: ethBalance
+      etherBalance: ethBalance,
     });
   } catch (error) {
     console.log({ error });
