@@ -6,26 +6,32 @@ const compound = new (Compound as any)(process.env.PROVIDER_URL, {
 });
 import { Request, Response } from "express";
 
-export const Repay = async (req: Request, res: Response) => {
+export const RepayBorrow = async (req: Request, res: Response) => {
   try {
-    const { assetName, assetToRepay }: any = req.body;
-    // const cTokenAddress = Compound.utils.getAddress(Compound.cDai);
-    let tx = await compound.repayBorrow(assetName, assetToRepay);
-    const repayResult = await tx.wait(1);
+    const { assetName, underlyingToRepay }: any = req.body;
+    const cTokenAddress = Compound.util.getAddress(Compound.cDAI);
+    let tx = await compound.repayBorrow(assetName, underlyingToRepay);
+    const repayBorrowResult = await tx.wait(1);
 
-    if (repayResult.events && repayResult.events.Failure) {
-      const errorCode = repayResult.events.Failures.returnValues.error;
-      console.error(`repay error ${errorCode}`);
+    if (repayBorrowResult.events && repayBorrowResult.events.Failure) {
+      const errorCode = repayBorrowResult.events.Failure.returnValues.error;
+      console.error(`repayBorrow error, code ${errorCode}`);
       process.exit(1);
     }
 
+    // let balance = await _borrowBalanceCurrent(
+    //   "0x41b5844f4680a8c38fbb695b7f9cfd1f64474a72",
+    //   myWalletAddress,
+    //   underlyingDecimals
+    // );
+
     return res.status(200).send({
       status: 200,
-      message: "Repaid Borrowed Asset Successfully",
-      tx: repayResult,
+      message: "Borrow Repayed successfully",
+      txn: repayBorrowResult,
     });
   } catch (error) {
-    console.log(error);
+    console.log({ error });
     return res.status(500).send({ error });
   }
 };

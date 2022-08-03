@@ -1,6 +1,4 @@
-const Web3 = require("web3");
 const Compound = require("@compound-finance/compound-js");
-import { assert } from "console";
 import { Request, Response } from "express";
 import { compound } from "../../config/compound";
 import {
@@ -8,44 +6,64 @@ import {
   _balanceOfUnderlying,
   _exchangeRateCurrent,
 } from "../../utils";
+const Web3 = require("web3");
 const providerUrl = process.env.PROVIDER_URL;
 const web3 = new Web3(providerUrl);
 
-export const SupplyERC20 = async (req: Request, res: Response) => {
+export const SupplyErc20 = async (req: Request, res: Response) => {
   try {
-    const { assetName, walletAddress, cTokenName, assetToSupply }: any =
-      req.body;
+    const {
+      assetName,
+      myWalletAddress,
+      cTokenName,
+      underlyingTokensToSupply,
+    }: any = req.body;
 
-    const tokenBalance = await _balanceOf(assetName, walletAddress);
-    console.log(`My wallet's ${assetName} token balance:`, tokenBalance);
+    // See how many underlying ERC-20 tokens are in my wallet before we supply
+    const tokenBalance = await _balanceOf(assetName, myWalletAddress);
+    console.log(`My wallet's ${assetName} Token Balance:`, tokenBalance);
 
-    const underlyingDecimal = Compound.decimals[assetName];
+    // Number of decimals defined in this ERC20 token's contract
+    const underlyingDecimals = Compound.decimals[assetName];
+
     console.log(
-      `Approving and then Supplying ${assetName} to the Compound Protocol`,
+      `Approving and then supplying ${assetName} to the Compound Protocol...`,
       "\n"
     );
 
-    let tnx = await compound.supply(assetName, assetToSupply.toString());
-    await tnx.wait(1);
+    // Mint cTokens by supplying underlying tokens to the Compound Protocol
+    let txn = await compound.supply(
+      assetName,
+      underlyingTokensToSupply.toString()
+    );
+    await txn.wait(1); // wait until the transaction has 1 confirmation on the blockchain
 
-    console.log(`c${assetName} "Mint" operation successfully`, "\n");
+    console.log(`c${assetName} "Mint" operation successful.`, "\n");
 
-    const balance = await _balanceOfUnderlying(cTokenName, walletAddress);
-    const balanceOfUnderlying = +balance / Math.pow(10, assetToSupply);
+    const bal = await _balanceOfUnderlying(cTokenName, myWalletAddress);
+    const balanceOfUnderlying = +bal / Math.pow(10, underlyingDecimals);
 
-    console.log(`${assetName} supplied to the Compound Protocol:`, "\n");
+    console.log(
+      `${assetName} supplied to the Compound Protocol:`,
+      balanceOfUnderlying,
+      "\n"
+    );
 
-    let cTokenBalance = await _balanceOf(cTokenName, walletAddress);
-    console.log(`c${assetName} token balance:`, cTokenBalance);
+    let cTokenBalance = await _balanceOf(cTokenName, myWalletAddress);
+    console.log(`My wallet's c${assetName} Token Balance:`, cTokenBalance);
 
-    let underlyingBalance = await _balanceOf(assetName, walletAddress);
+    let underlyingBalance = await _balanceOf(assetName, myWalletAddress);
 
-    cTokenBalance = await _balanceOf(cTokenName, walletAddress);
-    underlyingBalance = await _balanceOf(assetName, walletAddress);
+    // let erCurrent = await _exchangeRateCurrent(cTokenName);
+    // let exchangeRate = +erCurrent / Math.pow(10, 18 + underlyingDecimals - 8);
+
+    cTokenBalance = await _balanceOf(cTokenName, myWalletAddress);
+    underlyingBalance = await _balanceOf(assetName, myWalletAddress);
 
     return res.status(200).send({
       underlyingBalance: underlyingBalance,
       cTokenBalance: cTokenBalance,
+      // exchangeRate: exchangeRate,
     });
   } catch (error) {
     return res.send({ error });

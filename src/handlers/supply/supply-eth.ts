@@ -38,7 +38,8 @@ export const supplyEther = async (req: Request, res: Response) => {
         await cEthContract.methods.balanceOfUnderlying(myWalletAddress).call()
       )) / Math.pow(10, ethDecimals);
 
-    let cTokenBalance = (await cEthContract.methods.balanceOf(myWalletAddress).call()) / 1e8;
+    let cTokenBalance =
+      (await cEthContract.methods.balanceOf(myWalletAddress).call()) / 1e8;
 
     let exchangeRateCurrent =
       (await cEthContract.methods.exchangeRateCurrent().call()) /
@@ -59,7 +60,7 @@ export const supplyEther = async (req: Request, res: Response) => {
       exchangeRateCurrent: exchangeRateCurrent,
     });
   } catch (error) {
-    console.log(error)
-    return res.status(500).send({error});
+    console.log(error);
+    return res.status(500).send({ error });
   }
 };
