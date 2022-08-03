@@ -5,30 +5,41 @@ const Web3 = require("web3");
 const providerUrl = process.env.PROVIDER_URL;
 const web3 = new Web3(providerUrl);
 const compound = new (Compound as any)(process.env.PROVIDER_URL, {
-    privateKey: process.env.PRIVATE_KEY
-})
-import { Request, Response} from "express";
-import { enterMarket, _balanceOf} from "../../utils";
+  privateKey: process.env.PRIVATE_KEY,
+});
+import { Request, Response } from "express";
+import { enterMarket, _balanceOf } from "../../utils";
 
-export const BorrowERC20WithEth = async (req: Request, res: Response) => {
-    try {
-        const { ethToSupplyAsCollateral, assetName, assetToBorrow, walletAddress} = req.body;
-        await compound.supply(Compound.ETH, ethToSupplyAsCollateral);
-        await enterMarket;
+export const BorrowErc20WithEth = async (req: Request, res: Response) => {
+  try {
+    const {
+      ethToSupplyAsCollateral,
+      underlyingToBorrow,
+      assetName,
+      myWalletAddress,
+    } = req.body;
 
-        console.log(`Borrowed ${assetToBorrow} ${assetName}`);
+    await compound.supply(Compound.ETH, ethToSupplyAsCollateral);
+    await enterMarket();
 
-        const balance = await _balanceOf(assetName, walletAddress);
-        const ethBalance = await _balanceOf(assetName, walletAddress);
+    console.log(
+      `Now attempting to borrow ${underlyingToBorrow} ${assetName}...`
+    );
 
-        return res.status(200).send({
-            status: 200,
-            message: "Asset borrowed successfully",
-            borrowBalance: balance,
-            ethBalance: ethBalance
-        })
-        
-    } catch (error) {
-        return res.status(500).send(error);
-    }
-}
+    let tx = await compound.borrow(assetName, underlyingToBorrow);
+    await tx.wait(1);
+    console.log(`Borrowed ${underlyingToBorrow} ${assetName}...`);
+
+    const balance = await _balanceOf(assetName, myWalletAddress);
+    const ethBalance = await _balanceOf(assetName, myWalletAddress);
+
+    return res.status(200).send({
+      status: 200,
+      message: "Asset Borrowed successfully",
+      borrowBalance: balance,
+      etherBalance: ethBalance,
+    });
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+};
