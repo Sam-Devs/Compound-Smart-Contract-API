@@ -14,20 +14,20 @@ export const SupplyErc20 = async (req: Request, res: Response) => {
   try {
     const {
       assetName,
-      myWalletAddress,
+      walletAddress,
       cTokenName,
       underlyingTokensToSupply,
     }: any = req.body;
 
     // See how many underlying ERC-20 tokens are in my wallet before we supply
-    const tokenBalance = await _balanceOf(assetName, myWalletAddress);
-    console.log(`My wallet's ${assetName} Token Balance:`, tokenBalance);
+    const tokenBalance = await _balanceOf(assetName, walletAddress);
+    console.log(`${assetName} Token Balance:`, tokenBalance);
 
     // Number of decimals defined in this ERC20 token's contract
     const underlyingDecimals = Compound.decimals[assetName];
 
     console.log(
-      `Approving and then supplying ${assetName} to the Compound Protocol...`,
+      `Approving and then supplying ${assetName} to the Compound Protocol`,
       "\n"
     );
 
@@ -36,11 +36,12 @@ export const SupplyErc20 = async (req: Request, res: Response) => {
       assetName,
       underlyingTokensToSupply.toString()
     );
-    await txn.wait(1); // wait until the transaction has 1 confirmation on the blockchain
+    // wait until the transaction has 1 confirmation on the blockchain
+    await txn.wait(1); 
 
     console.log(`c${assetName} "Mint" operation successful.`, "\n");
 
-    const bal = await _balanceOfUnderlying(cTokenName, myWalletAddress);
+    const bal = await _balanceOfUnderlying(cTokenName, walletAddress);
     const balanceOfUnderlying = +bal / Math.pow(10, underlyingDecimals);
 
     console.log(
@@ -49,16 +50,16 @@ export const SupplyErc20 = async (req: Request, res: Response) => {
       "\n"
     );
 
-    let cTokenBalance = await _balanceOf(cTokenName, myWalletAddress);
+    let cTokenBalance = await _balanceOf(cTokenName, walletAddress);
     console.log(`My wallet's c${assetName} Token Balance:`, cTokenBalance);
 
-    let underlyingBalance = await _balanceOf(assetName, myWalletAddress);
+    let underlyingBalance = await _balanceOf(assetName, walletAddress);
 
     // let erCurrent = await _exchangeRateCurrent(cTokenName);
     // let exchangeRate = +erCurrent / Math.pow(10, 18 + underlyingDecimals - 8);
 
-    cTokenBalance = await _balanceOf(cTokenName, myWalletAddress);
-    underlyingBalance = await _balanceOf(assetName, myWalletAddress);
+    cTokenBalance = await _balanceOf(cTokenName, walletAddress);
+    underlyingBalance = await _balanceOf(assetName, walletAddress);
 
     return res.status(200).send({
       underlyingBalance: underlyingBalance,
