@@ -4,8 +4,10 @@ dotenv.config();
 
 import { kovanABI } from "../../abi/kovanAbi";
 
+const providerUrl = process.env.PROVIDER_URL;
+// const privateKey = process.env.PRIVATE_KEY;
 const Web3 = require("web3");
-const web3 = new Web3(process.env.PROVIDER_URL);
+const web3 = new Web3(providerUrl);
 
 // Your Ethereum wallet private key
 const privateKey = process.env.PRIVATE_KEY;
@@ -17,9 +19,10 @@ web3.eth.accounts.wallet.add("0x" + privateKey);
 const contractAddress = "0x41b5844f4680a8c38fbb695b7f9cfd1f64474a72";
 const cEthContract = new web3.eth.Contract(kovanABI, contractAddress);
 
-const ethDecimals = 18; // Ethereum has 18 decimal places
+// Ethereum has 18 decimal places
+const ethDecimals = 18; 
 
-export const supplyEther = async (req: Request, res: Response) => {
+export const SupplyEther = async (req: Request, res: Response) => {
   try {
     const { myWalletAddress, amountToSupply } = req.body;
     let ethBalance =
