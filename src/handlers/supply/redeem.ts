@@ -21,7 +21,7 @@ const cEthContract = new web3.eth.Contract(kovanABI, contractAddress);
 // Ethereum has 18 decimal places
 const ethDecimals = 18; 
 
-export const redeemToken = async (req: Request, res: Response) => {
+export const RedeemToken = async (req: Request, res: Response) => {
   try {
     const { amountToRedeem, walletAddress } = req.body;
     let exchangeRateCurrent =
